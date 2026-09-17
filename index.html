@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Multimodal Deep Learning System for Diabetic Retinopathy Staging with Clinical Deferral Mechanism. Fuses retinal fundus images with patient clinical data for AI-assisted DR screening.">
+  <title>DR Vision — Multimodal Diabetic Retinopathy Staging System</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
+</head>
+<body>
+
+  <!-- ====== NAVIGATION ====== -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <div class="nav-brand">
+        <div class="logo-icon">👁️</div>
+        <span>DR Vision</span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#hero" class="active">Home</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#analysis">Analysis</a></li>
+        <li><a href="#results-section">Results</a></li>
+        <li><a href="#explainability">Explainability</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ====== HERO SECTION ====== -->
+  <section class="hero" id="hero">
+    <div class="hero-bg-animation">
+      <canvas id="particles-canvas"></canvas>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="pulse"></span>
+        Hack 2 Ignite 2026 — BE Information Technology
+      </div>
+      <h1>
+        Multimodal <span class="gradient-text">Deep Learning</span> System<br>
+        for Diabetic Retinopathy Staging
+      </h1>
+      <p class="hero-subtitle">
+        Fusing retinal fundus images with patient clinical data through multimodal deep learning, 
+        with a confidence-based deferral mechanism for clinician-in-the-loop safety.
+      </p>
+      <div class="hero-team">
+        <div class="team-member">👤 Rohit Dhondage</div>
+        <div class="team-member">👤 Yash Tupe</div>
+        <div class="team-member">👤 Yash Pethkar</div>
+        <div class="team-member">👤 Sahil Adagale</div>
+      </div>
+      <p style="font-size: 0.75rem; color: #5a6478; margin-bottom: 20px;">
+        Guide: Prof. S. N. Bhadane &nbsp;|&nbsp; PVG's College of Engineering, Nashik
+      </p>
+      <div class="hero-cta">
+        <a href="#analysis" class="btn btn-primary">🔬 Start Analysis</a>
+        <a href="#architecture" class="btn btn-secondary">📐 View Architecture</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== ARCHITECTURE SECTION ====== -->
+  <section class="section" id="architecture">
+    <div class="container">
+      <div class="section-header animate-on-scroll">
+        <div class="section-label">System Architecture</div>
+        <h2>Multimodal Pipeline Overview</h2>
+        <p>End-to-end architecture fusing image and clinical data through a fully-connected fusion layer</p>
+      </div>
+
+      <div class="glass-card architecture-diagram animate-on-scroll">
+        <div class="arch-flow">
+          <!-- Input -->
+          <div class="arch-node">
+            <div class="node-icon">📷</div>
+            <div class="node-label">Fundus Image</div>
+            <div class="node-sub">RGB Input</div>
+          </div>
+          <div class="arch-arrow animated"><div class="arrow-line"></div></div>
+
+          <!-- Image Encoder -->
+          <div class="arch-node">
+            <div class="node-icon">🧠</div>
+            <div class="node-label">Image Encoder</div>
+            <div class="node-sub">ResNet18 / EfficientNet-B0</div>
+          </div>
+          <div class="arch-arrow animated"><div class="arrow-line"></div></div>
+
+          <!-- Fusion -->
+          <div class="arch-node" style="border-color: rgba(108,92,231,0.4); background: rgba(108,92,231,0.1);">
+            <div class="node-icon">🔗</div>
+            <div class="node-label">Multimodal Fusion</div>
+            <div class="node-sub">FC Fusion Layer</div>
+          </div>
+          <div class="arch-arrow animated"><div class="arrow-line"></div></div>
+
+          <!-- Outputs -->
+          <div class="arch-branch">
+            <div class="arch-node" style="border-color: rgba(0,201,167,0.4); background: rgba(0,201,167,0.05);">
+              <div class="node-icon">📊</div>
+              <div class="node-label">DR Classifier</div>
+              <div class="node-sub">5-Class Staging</div>
+            </div>
+            <div class="arch-node" style="border-color: rgba(255,107,53,0.4); background: rgba(255,107,53,0.05);">
+              <div class="node-icon">🛡️</div>
+              <div class="node-label">Deferral System</div>
+              <div class="node-sub">Contrastive Learning</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Second row: tabular path -->
+        <div class="arch-flow" style="margin-top: 20px; justify-content: flex-start; padding-left: 0;">
+          <div class="arch-node">
+            <div class="node-icon">📋</div>
+            <div class="node-label">Clinical Data</div>
+            <div class="node-sub">Age, BP, HbA1c, ...</div>
+          </div>
+          <div class="arch-arrow animated"><div class="arrow-line"></div></div>
+          <div class="arch-node">
+            <div class="node-icon">⚙️</div>
+            <div class="node-label">Tabular Encoder</div>
+            <div class="node-sub">Feed-Forward NN</div>
+          </div>
+          <div class="arch-arrow animated"><div class="arrow-line"></div></div>
+          <div class="arch-node" style="opacity: 0; pointer-events: none;">
+            <div class="node-icon">↗️</div>
+            <div class="node-label">→ Fusion</div>
+            <div class="node-sub">(merges above)</div>
+          </div>
+        </div>
+
+        <!-- Connection indicator -->
+        <div style="text-align: center; margin-top: 12px; font-size: 0.7rem; color: #5a6478;">
+          ↑ Both encoders feed into the Multimodal Fusion Layer above
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== ANALYSIS INPUT SECTION ====== -->
+  <section class="section" id="analysis">
+    <div class="container">
+      <div class="section-header animate-on-scroll">
+        <div class="section-label">Analysis Input</div>
+        <h2>Upload Fundus Image & Clinical Data</h2>
+        <p>Select a sample image or upload your own, then enter patient clinical information</p>
+      </div>
+
+      <div class="input-grid animate-on-scroll">
+        <!-- LEFT: Image Upload -->
+        <div class="glass-card">
+          <h3 style="margin-bottom: 16px; font-size: 1rem;">📷 Retinal Fundus Image</h3>
+          
+          <div class="upload-zone" id="upload-zone">
+            <div class="upload-placeholder">
+              <div class="upload-icon">📂</div>
+              <p class="upload-text">
+                <strong>Click to upload</strong> or drag and drop<br>
+                <span style="font-size: 0.75rem; color: #5a6478;">PNG, JPG up to 10MB</span>
+              </p>
+            </div>
+            <div class="preview-container">
+              <img id="preview-image" class="preview-image" alt="Fundus preview">
+              <div class="preview-actions">
+                <button class="btn btn-sm btn-secondary" id="clear-image-btn">✕ Clear</button>
+              </div>
+            </div>
+            <input type="file" id="file-input" accept="image/*" hidden>
+          </div>
+
+          <div class="sample-gallery">
+            <h4>📌 Or select a sample case:</h4>
+            <div class="sample-images">
+              <div class="sample-thumb" data-key="no_dr">
+                <img src="assets/images/fundus_no_dr.jpg" alt="No DR">
+                <div class="thumb-label" style="color: #00c9a7;">No DR</div>
+              </div>
+              <div class="sample-thumb" data-key="mild_dr">
+                <img src="assets/images/fundus_mild_dr.jpg" alt="Mild DR">
+                <div class="thumb-label" style="color: #a8e063;">Mild</div>
+              </div>
+              <div class="sample-thumb" data-key="moderate_dr">
+                <img src="assets/images/fundus_moderate_dr.jpg" alt="Moderate DR">
+                <div class="thumb-label" style="color: #ffd700;">Moderate</div>
+              </div>
+              <div class="sample-thumb" data-key="severe_dr">
+                <img src="assets/images/fundus_severe_dr.jpg" alt="Severe DR">
+                <div class="thumb-label" style="color: #ff6b35;">Severe</div>
+              </div>
+              <div class="sample-thumb" data-key="proliferative_dr">
+                <img src="assets/images/fundus_proliferative_dr.jpg" alt="Proliferative DR">
+                <div class="thumb-label" style="color: #ff2d55;">Proliferative</div>
+              </div>
+              <div class="sample-thumb" data-key="low_quality">
+                <img src="assets/images/fundus_low_quality.jpg" alt="Low Quality">
+                <div class="thumb-label" style="color: #ff6b35;">⚠ Low Quality</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Clinical Data Form -->
+        <div class="glass-card">
+          <h3 style="margin-bottom: 16px; font-size: 1rem;">📋 Patient Clinical Data</h3>
+
+          <div class="clinical-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-age">Age (years)</label>
+                <input type="number" id="input-age" placeholder="e.g. 55" min="18" max="100">
+              </div>
+              <div class="form-group">
+                <label for="input-duration">Diabetes Duration (years)</label>
+                <input type="number" id="input-duration" placeholder="e.g. 10" min="0" max="50">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-systolic">Systolic BP (mmHg)</label>
+                <input type="number" id="input-systolic" placeholder="e.g. 140" min="80" max="220">
+              </div>
+              <div class="form-group">
+                <label for="input-diastolic">Diastolic BP (mmHg)</label>
+                <input type="number" id="input-diastolic" placeholder="e.g. 90" min="40" max="140">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-hba1c">HbA1c (%)</label>
+                <input type="number" id="input-hba1c" placeholder="e.g. 7.5" min="4" max="15" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="input-bmi">BMI (kg/m²)</label>
+                <input type="number" id="input-bmi" placeholder="e.g. 28.5" min="15" max="50" step="0.1">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-cholesterol">Cholesterol (mg/dL)</label>
+                <input type="number" id="input-cholesterol" placeholder="e.g. 220" min="100" max="400">
+              </div>
+              <div class="form-group">
+                <label for="input-smoking">Smoking Status</label>
+                <select id="input-smoking">
+                  <option value="never">Never</option>
+                  <option value="former">Former</option>
+                  <option value="current">Current</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="input-family">Family History of DR</label>
+                <select id="input-family">
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="input-insulin">Insulin Use</label>
+                <select id="input-insulin">
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="sample-patients">
+            <h4>⚡ Quick-fill sample patient:</h4>
+            <div class="patient-chips">
+              <div class="patient-chip" data-profile="no_dr">Healthy (35y)</div>
+              <div class="patient-chip" data-profile="mild_dr">Mild Risk (48y)</div>
+              <div class="patient-chip" data-profile="moderate_dr">Moderate Risk (55y)</div>
+              <div class="patient-chip" data-profile="severe_dr">High Risk (62y)</div>
+              <div class="patient-chip" data-profile="proliferative_dr">Critical (68y)</div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" id="analyze-btn" style="width: 100%; margin-top: 24px; justify-content: center;" disabled>
+            🔬 Run Multimodal Analysis
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== PROCESSING ANIMATION ====== -->
+  <section class="section processing-section" id="processing-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Processing</div>
+        <h2>Running Multimodal Pipeline...</h2>
+      </div>
+
+      <div class="glass-card">
+        <div class="pipeline-steps">
+          <div class="pipeline-step">
+            <div class="step-icon">📷</div>
+            <div class="step-spinner"></div>
+            <div class="step-label">Image Encoding</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-step">
+            <div class="step-icon">📋</div>
+            <div class="step-spinner"></div>
+            <div class="step-label">Tabular Encoding</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-step">
+            <div class="step-icon">🔗</div>
+            <div class="step-spinner"></div>
+            <div class="step-label">Fusion</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-step">
+            <div class="step-icon">📊</div>
+            <div class="step-spinner"></div>
+            <div class="step-label">Classification</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-step">
+            <div class="step-icon">🛡️</div>
+            <div class="step-spinner"></div>
+            <div class="step-label">Quality Check</div>
+          </div>
+          <div class="pipeline-connector"></div>
+          <div class="pipeline-step">
+            <div class="step-icon">🔍</div>
+            <div class="step-spinner"></div>
+            <div class="step-label">Explainability</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== RESULTS SECTION ====== -->
+  <section class="section results-section" id="results-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Diagnosis Results</div>
+        <h2>DR Staging Analysis Complete</h2>
+      </div>
+
+      <!-- Comparison Toggle -->
+      <div class="comparison-toggle">
+        <span class="toggle-label" id="toggle-label-image">Image-Only</span>
+        <div class="toggle-switch active" id="fusion-toggle">
+          <div class="toggle-knob"></div>
+        </div>
+        <span class="toggle-label active" id="toggle-label-multi">Multimodal Fusion</span>
+      </div>
+      <div class="text-center mb-lg">
+        <span id="comparison-info" style="font-size: 0.8rem; color: #8b95a8;"></span>
+      </div>
+
+      <div class="results-grid">
+        <!-- Main Result -->
+        <div class="glass-card result-main">
+          <h3 style="margin-bottom: 24px; font-size: 1rem; color: #8b95a8;">Predicted DR Stage</h3>
+          
+          <div class="result-badge stage-0" id="result-badge">
+            <span style="font-size: 1.5rem">🟢</span>
+            Stage 0: No DR
+          </div>
+
+          <!-- Confidence Gauge -->
+          <div class="confidence-gauge">
+            <svg class="gauge-svg" viewBox="0 0 200 110">
+              <path class="gauge-bg" d="M 20 100 A 80 80 0 0 1 180 100" />
+              <path class="gauge-fill" id="gauge-fill" d="M 20 100 A 80 80 0 0 1 180 100" 
+                    stroke-dasharray="251.3" stroke-dashoffset="251.3" />
+            </svg>
+            <div style="text-align: center; margin-top: -30px;">
+              <div class="gauge-value" id="gauge-value">0%</div>
+              <div class="gauge-label">Model Confidence</div>
+            </div>
+          </div>
+
+          <!-- Class Probabilities -->
+          <div class="class-probs">
+            <h4>Class Probability Distribution</h4>
+            <div id="class-probs-container"></div>
+          </div>
+        </div>
+
+        <!-- Deferral Panel -->
+        <div class="glass-card deferral-card">
+          <h3 style="margin-bottom: 24px; font-size: 1rem; color: #8b95a8;">🛡️ Deferral Mechanism</h3>
+
+          <div class="deferral-status accepted" id="deferral-status">
+            ✅ ACCEPTED — Automated Diagnosis
+          </div>
+
+          <p id="deferral-explanation" class="deferral-explanation">
+            Select an image and run analysis to see the deferral decision.
+          </p>
+
+          <div class="threshold-control">
+            <label for="threshold-slider">Confidence Threshold (Deferral Cutoff)</label>
+            <input type="range" class="threshold-slider" id="threshold-slider" 
+                   min="0.3" max="0.95" step="0.05" value="0.60">
+            <div class="threshold-value" id="threshold-value">60%</div>
+            <p style="font-size: 0.7rem; color: #5a6478; margin-top: 8px;">
+              Drag to adjust: lower = more automation, higher = more clinician referrals
+            </p>
+          </div>
+
+          <div style="margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.02); border-radius: 8px; text-align: left;">
+            <p style="font-size: 0.75rem; color: #8b95a8; margin-bottom: 8px;"><strong>How it works:</strong></p>
+            <p style="font-size: 0.7rem; color: #5a6478; line-height: 1.6;">
+              The deferral system uses contrastive learning trained on synthetically degraded images 
+              (blurred, rotated, poorly lit) to detect unreliable inputs. When the model's confidence 
+              falls below the threshold, the case is automatically routed to an ophthalmologist instead 
+              of returning an automated diagnosis — preventing silent misdiagnosis.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== EXPLAINABILITY ====== -->
+      <div id="explainability">
+        <div class="section-header" style="margin-top: 32px;">
+          <div class="section-label">Explainability</div>
+          <h2>Why did the model decide this?</h2>
+          <p>Grad-CAM highlights important image regions; SHAP shows clinical feature contributions</p>
+        </div>
+
+        <div class="explainability-grid">
+          <!-- Grad-CAM -->
+          <div class="glass-card gradcam-container">
+            <h3 style="margin-bottom: 16px; font-size: 1rem;">🔥 Grad-CAM Activation Map</h3>
+            <div class="gradcam-canvas-wrap">
+              <canvas id="gradcam-canvas"></canvas>
+            </div>
+            <p id="gradcam-description" style="font-size: 0.8rem; color: #8b95a8; margin-top: 12px; text-align: center; min-height: 40px;">
+              Run analysis to generate the activation heatmap.
+            </p>
+            <div class="gradcam-legend">
+              <span>Low</span>
+              <div class="legend-bar"></div>
+              <span>High Activation</span>
+            </div>
+            <div class="gradcam-opacity-control">
+              <label>Heatmap Opacity:</label>
+              <input type="range" id="opacity-slider" min="0" max="1" step="0.05" value="0.55">
+            </div>
+          </div>
+
+          <!-- SHAP -->
+          <div class="glass-card shap-container" id="shap-container">
+            <h3 style="margin-bottom: 16px; font-size: 1rem;">📊 SHAP Feature Attribution</h3>
+            <p style="font-size: 0.8rem; color: #8b95a8;">
+              Run analysis to see how each clinical feature contributed to the prediction.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Download -->
+      <div class="text-center" style="margin-top: 48px;">
+        <button class="btn btn-primary" id="download-report-btn" style="font-size: 1rem; padding: 16px 40px;">
+          📄 Download Clinical Report (PDF)
+        </button>
+        <p style="font-size: 0.7rem; color: #5a6478; margin-top: 12px;">
+          Generates a comprehensive PDF including diagnosis, probabilities, SHAP values, and deferral status
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">DR Vision — Multimodal DR Staging System</div>
+        <p class="footer-college">
+          PVG's College of Engineering & Shrikrushna S. Dhamankar Institute of Management, Nashik<br>
+          BE Information Technology — Final Year Project 2026-27
+        </p>
+        <ul class="footer-links">
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#architecture">Architecture</a></li>
+          <li><a href="#analysis">Analysis</a></li>
+          <li><a href="#explainability">Explainability</a></li>
+        </ul>
+        <p class="footer-copy">
+          © 2026 Rohit Dhondage, Yash Tupe, Yash Pethkar, Sahil Adagale | Guide: Prof. S. N. Bhadane
+        </p>
+        <p style="font-size: 0.65rem; color: #3a4258; margin-top: 8px;">
+          ⚠️ AI Disclosure: This prototype was developed with AI assistance (code generation & design) as permitted by hackathon rules.
+          <br>Built with open-source tools: HTML, CSS, JavaScript, jsPDF. No paid subscriptions required.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/simulator.js"></script>
+  <script src="js/gradcam.js"></script>
+  <script src="js/shap.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
