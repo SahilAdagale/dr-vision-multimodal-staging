@@ -107,19 +107,86 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dom.uploadZone.addEventListener('dragover', (e) => {
       e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'copy';
+      }
       dom.uploadZone.classList.add('drag-over');
     });
 
-    dom.uploadZone.addEventListener('dragleave', () => {
-      dom.uploadZone.classList.remove('drag-over');
+    dom.uploadZone.addEventListener('dragleave', (e) => {
+      if (!dom.uploadZone.contains(e.relatedTarget)) {
+        dom.uploadZone.classList.remove('drag-over');
+      }
     });
 
     dom.uploadZone.addEventListener('drop', (e) => {
       e.preventDefault();
       dom.uploadZone.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) {
-        handleImageFile(file);
+
+      // 1. Filesystem file drop
+      const files = e.dataTransfer ? e.dataTransfer.files : null;
+      if (files && files.length > 0) {
+        const file = files[0];
+        if (file && file.type.startsWith('image/')) {
+          handleImageFile(file);
+          if (typeof showToast === 'function') {
+            showToast('Fundus image uploaded successfully', 'success', '📷');
+          }
+          return;
+        }
+      }
+
+      // 2. Sample case image drop
+      let sampleData = null;
+      try {
+        const jsonStr = e.dataTransfer ? e.dataTransfer.getData('application/json') : null;
+        if (jsonStr) sampleData = JSON.parse(jsonStr);
+      } catch (_) {}
+
+      let sampleKey = sampleData?.key || 
+                      (e.dataTransfer ? (e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('text')) : null);
+      let sampleSrc = sampleData?.imgSrc || 
+                      (e.dataTransfer ? (e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('URL')) : null);
+
+      const allThumbs = Array.from(document.querySelectorAll('.sample-thumb'));
+      let targetThumb = null;
+
+      if (sampleKey && DRSimulator.SAMPLE_PROFILES[sampleKey]) {
+        targetThumb = document.querySelector(`.sample-thumb[data-key="${sampleKey}"]`);
+      }
+
+      if (!targetThumb) {
+        targetThumb = allThumbs.find(t => {
+          const img = t.querySelector('img');
+          const src = img?.src || '';
+          return (sampleSrc && src.includes(sampleSrc)) || 
+                 (sampleKey && (src.includes(sampleKey) || t.dataset.key === sampleKey));
+        });
+        if (targetThumb) {
+          sampleKey = targetThumb.dataset.key;
+          sampleSrc = targetThumb.querySelector('img')?.src;
+        }
+      }
+
+      if (targetThumb && sampleKey) {
+        const imgSrc = sampleSrc || targetThumb.querySelector('img')?.src || `assets/images/fundus_${sampleKey}.jpg`;
+        selectSampleImage(sampleKey, imgSrc, targetThumb);
+        const label = targetThumb.querySelector('.thumb-label')?.textContent || sampleKey;
+        if (typeof showToast === 'function') {
+          showToast(`Sample case loaded: ${label}`, 'success', '👁️');
+        }
+        return;
+      }
+
+      // 3. Web image URL drop
+      const droppedUrl = e.dataTransfer ? (e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('URL')) : null;
+      if (droppedUrl && (droppedUrl.startsWith('http') || droppedUrl.startsWith('data:image'))) {
+        state.selectedImage = droppedUrl;
+        state.selectedImageKey = 'custom_url';
+        showImagePreview(droppedUrl);
+        if (typeof showToast === 'function') {
+          showToast('Image loaded via drag & drop', 'info', '🖼️');
+        }
       }
     });
 
@@ -169,27 +236,59 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAnalyzeButton();
   }
 
+  function selectSampleImage(key, imgSrc, thumbElement) {
+    document.querySelectorAll('.sample-thumb').forEach(t => t.classList.remove('selected'));
+    if (thumbElement) {
+      thumbElement.classList.add('selected');
+    } else {
+      const matchingThumb = document.querySelector(`.sample-thumb[data-key="${key}"]`);
+      if (matchingThumb) matchingThumb.classList.add('selected');
+    }
+
+    state.selectedImage = imgSrc;
+    state.selectedImageKey = key;
+    state.uploadedImage = null;
+    showImagePreview(imgSrc);
+
+    // Auto-fill clinical data for the selected sample
+    const profile = DRSimulator.SAMPLE_PROFILES[key];
+    if (profile) {
+      fillClinicalData(profile);
+    }
+  }
+
   // ===== SAMPLE IMAGES =====
   function initSampleImages() {
     document.querySelectorAll('.sample-thumb').forEach(thumb => {
+      thumb.setAttribute('draggable', 'true');
+
+      const handleDragStart = (e) => {
+        const key = thumb.dataset.key;
+        const img = thumb.querySelector('img');
+        const imgSrc = img ? img.src : '';
+        if (e.dataTransfer) {
+          e.dataTransfer.setData('text/plain', key);
+          e.dataTransfer.setData('application/json', JSON.stringify({ key, imgSrc }));
+          e.dataTransfer.effectAllowed = 'copy';
+        }
+        thumb.classList.add('dragging');
+      };
+
+      thumb.addEventListener('dragstart', handleDragStart);
+      thumb.addEventListener('dragend', () => {
+        thumb.classList.remove('dragging');
+      });
+
+      const img = thumb.querySelector('img');
+      if (img) {
+        img.addEventListener('dragstart', handleDragStart);
+      }
+
       thumb.addEventListener('click', (e) => {
         e.stopPropagation();
         const key = thumb.dataset.key;
         const imgSrc = thumb.querySelector('img').src;
-
-        // Toggle selection
-        document.querySelectorAll('.sample-thumb').forEach(t => t.classList.remove('selected'));
-        thumb.classList.add('selected');
-
-        state.selectedImage = imgSrc;
-        state.selectedImageKey = key;
-        showImagePreview(imgSrc);
-
-        // Auto-fill clinical data for the selected sample
-        const profile = DRSimulator.SAMPLE_PROFILES[key];
-        if (profile) {
-          fillClinicalData(profile);
-        }
+        selectSampleImage(key, imgSrc, thumb);
       });
     });
   }

@@ -668,9 +668,20 @@ a {
   aspect-ratio: 1;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  cursor: pointer;
+  cursor: grab;
+  user-select: none;
   border: 2px solid transparent;
   transition: all var(--transition-fast);
+}
+
+.sample-thumb:active {
+  cursor: grabbing;
+}
+
+.sample-thumb.dragging {
+  opacity: 0.45;
+  transform: scale(0.95);
+  border-color: var(--accent-primary);
 }
 
 .sample-thumb:hover {
