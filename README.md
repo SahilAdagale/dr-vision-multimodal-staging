@@ -1,8 +1,9 @@
 # DR Vision — Multimodal Deep Learning System for Diabetic Retinopathy Staging
 
-![License](https://img.shields.io/badge/License-Academic-blue)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Status](https://img.shields.io/badge/Status-Prototype-orange)
 ![Hackathon](https://img.shields.io/badge/Hack%202%20Ignite-2026-green)
+![PWA](https://img.shields.io/badge/PWA-Ready-brightgreen)
 
 ## 🔬 Overview
 
@@ -52,11 +53,17 @@ A **Multimodal Deep Learning System** that fuses retinal fundus images with pati
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/SahilAdagale/dr-vision-multimodal-staging.git
 
-# Open in browser (or just double-click index.html)
+# Open in browser (or double-click index.html)
 start index.html
 ```
+
+### Running the Test Suite
+Open `tests/test-runner.html` directly in any web browser to execute the automated unit test suite for the simulator, clinical rule weighting, and explainability modules.
+
+## 🤝 Contributing
+Contributions, bug reports, and suggestions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for coding standards, commit conventions, and pull request procedures.
 
 ## 📁 Project Structure
 
