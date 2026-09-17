@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DR Vision — Test Suite Runner</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <style>
+    body {
+      background: #0b0f19;
+      color: #e2e8f0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 40px 20px;
+    }
+    .test-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .test-header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .test-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .summary-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .summary-box .num {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .summary-box.pass .num { color: #00c9a7; }
+    .summary-box.fail .num { color: #ff2d55; }
+    .summary-box.total .num { color: #6c5ce7; }
+    .test-card {
+      background: rgba(18, 24, 38, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .test-card:hover {
+      border-color: rgba(255,255,255,0.15);
+      background: rgba(18, 24, 38, 0.9);
+    }
+    .badge-pass {
+      background: rgba(0, 201, 167, 0.15);
+      color: #00c9a7;
+      border: 1px solid rgba(0, 201, 167, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-fail {
+      background: rgba(255, 45, 85, 0.15);
+      color: #ff2d55;
+      border: 1px solid rgba(255, 45, 85, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .error-trace {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #ff6b81;
+      font-family: monospace;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #8b95a8;
+      text-decoration: none;
+      margin-bottom: 24px;
+      font-size: 0.9rem;
+      transition: color 0.2s ease;
+    }
+    .back-btn:hover {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <a href="../index.html" class="back-btn">← Back to DR Vision Dashboard</a>
+    
+    <div class="test-header">
+      <h1 style="font-size: 1.8rem; margin-bottom: 8px;">🧪 DR Vision Test Suite</h1>
+      <p style="color: #8b95a8; font-size: 0.95rem;">
+        Automated test runner for simulator logic, multimodal fusion, confidence deferral, and explainability.
+      </p>
+    </div>
+
+    <div class="test-summary">
+      <div class="summary-box total">
+        <div class="num" id="total-count">0</div>
+        <div style="font-size: 0.85rem; color: #8b95a8;">Total Tests</div>
+      </div>
+      <div class="summary-box pass">
+        <div class="num" id="pass-count">0</div>
+        <div style="font-size: 0.85rem; color: #8b95a8;">Passed</div>
+      </div>
+      <div class="summary-box fail">
+        <div class="num" id="fail-count">0</div>
+        <div style="font-size: 0.85rem; color: #8b95a8;">Failed</div>
+      </div>
+    </div>
+
+    <div id="test-list"></div>
+  </div>
+
+  <!-- App & Test Scripts -->
+  <script src="../js/simulator.js"></script>
+  <script src="../tests/simulator.test.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const results = window.DRSimulatorTests.run();
+      
+      document.getElementById('total-count').textContent = results.tests.length;
+      document.getElementById('pass-count').textContent = results.passed;
+      document.getElementById('fail-count').textContent = results.failed;
+
+      const listContainer = document.getElementById('test-list');
+      results.tests.forEach((t, i) => {
+        const item = document.createElement('div');
+        item.className = 'test-card';
+        
+        const isPass = t.status === 'PASS';
+        item.innerHTML = `
+          <div>
+            <div style="font-weight: 500; font-size: 0.95rem;">${i + 1}. ${t.name}</div>
+            ${t.error ? `<div class="error-trace">Error: ${t.error}</div>` : ''}
+          </div>
+          <span class="${isPass ? 'badge-pass' : 'badge-fail'}">${t.status}</span>
+        `;
+        listContainer.appendChild(item);
+      });
+    });
+  </script>
+</body>
+</html>
