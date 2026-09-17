@@ -470,13 +470,21 @@
         </div>
       </div>
 
-      <!-- Report Download -->
+      <!-- Report Download & Data Export -->
       <div class="text-center" style="margin-top: 48px;">
-        <button class="btn btn-primary" id="download-report-btn" style="font-size: 1rem; padding: 16px 40px;">
-          📄 Download Clinical Report (PDF)
-        </button>
-        <p style="font-size: 0.7rem; color: #5a6478; margin-top: 12px;">
-          Generates a comprehensive PDF including diagnosis, probabilities, SHAP values, and deferral status
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-bottom: 12px;">
+          <button class="btn btn-primary" id="download-report-btn" style="font-size: 1rem; padding: 14px 28px;">
+            📄 Download Clinical Report (PDF)
+          </button>
+          <button class="btn btn-secondary" id="export-json-btn" style="font-size: 1rem; padding: 14px 28px;">
+            💾 Export Record (JSON)
+          </button>
+          <button class="btn btn-secondary" id="export-csv-btn" style="font-size: 1rem; padding: 14px 28px;">
+            📊 Export Dataset (CSV)
+          </button>
+        </div>
+        <p style="font-size: 0.7rem; color: #5a6478;">
+          Generates comprehensive diagnostic reports, raw telemetry JSON, and tabular clinical CSV records
         </p>
       </div>
     </div>

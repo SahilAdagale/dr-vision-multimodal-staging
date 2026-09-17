@@ -66,6 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     downloadReportBtn: document.getElementById('download-report-btn'),
+    exportJsonBtn: document.getElementById('export-json-btn'),
+    exportCsvBtn: document.getElementById('export-csv-btn'),
     reportPreview: document.getElementById('report-preview'),
   };
 
@@ -480,13 +482,101 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ===== REPORT =====
+  // ===== REPORT & EXPORTS =====
+  function downloadBlob(content, filename, contentType) {
+    const blob = new Blob([content], { type: contentType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function exportJSON() {
+    if (!state.result) {
+      alert('Please run the multimodal analysis first to generate data.');
+      return;
+    }
+    const exportData = {
+      project: 'DR Vision — Multimodal DR Staging',
+      exportTimestamp: new Date().toISOString(),
+      patientClinicalData: state.clinicalData,
+      modelResults: {
+        stageId: state.result.stage.id,
+        stageName: state.result.stage.name,
+        stageLabel: state.result.stage.label,
+        riskLevel: state.result.stage.risk,
+        confidence: state.result.confidence,
+        deferred: DRSimulator.shouldDefer(state.result.confidence, 0.6),
+        probabilities: state.result.probabilities,
+        clinicalRiskIndex: state.result.clinicalRisk,
+        fusionStrategy: state.result.fusionStrategy,
+        modelVersion: state.result.modelVersion
+      },
+      shapAttributions: state.result.shapValues || []
+    };
+    const jsonStr = JSON.stringify(exportData, null, 2);
+    const filename = `dr_vision_record_${Date.now()}.json`;
+    downloadBlob(jsonStr, filename, 'application/json');
+  }
+
+  function exportCSV() {
+    if (!state.result) {
+      alert('Please run the multimodal analysis first to generate data.');
+      return;
+    }
+    const c = state.clinicalData || {};
+    const r = state.result;
+    const headers = [
+      'Timestamp', 'Age', 'DiabetesDuration', 'SystolicBP', 'DiastolicBP',
+      'HbA1c', 'BMI', 'Cholesterol', 'Smoking', 'FamilyHistory', 'Insulin',
+      'PredictedStageId', 'PredictedStageName', 'RiskLevel', 'Confidence',
+      'ClinicalRiskScore', 'Deferred', 'FusionStrategy'
+    ];
+    const row = [
+      new Date().toISOString(),
+      c.age || '',
+      c.diabetesDuration || '',
+      c.systolicBP || '',
+      c.diastolicBP || '',
+      c.hba1c || '',
+      c.bmi || '',
+      c.cholesterol || '',
+      c.smoking || '',
+      c.familyHistory || '',
+      c.insulin || '',
+      r.stage.id,
+      `"${r.stage.name}"`,
+      r.stage.risk,
+      (r.confidence * 100).toFixed(1) + '%',
+      (r.clinicalRisk * 100).toFixed(1) + '%',
+      DRSimulator.shouldDefer(r.confidence, 0.6) ? 'YES' : 'NO',
+      `"${r.fusionStrategy}"`
+    ];
+    const csvContent = headers.join(',') + '\n' + row.join(',') + '\n';
+    const filename = `dr_vision_dataset_${Date.now()}.csv`;
+    downloadBlob(csvContent, filename, 'text/csv;charset=utf-8;');
+  }
+
   if (dom.downloadReportBtn) {
     dom.downloadReportBtn.addEventListener('click', () => {
       if (state.result) {
         ReportGenerator.generateReport(state.result, state.clinicalData, state.selectedImage);
+      } else {
+        alert('Please run the multimodal analysis first to generate the report.');
       }
     });
+  }
+
+  if (dom.exportJsonBtn) {
+    dom.exportJsonBtn.addEventListener('click', exportJSON);
+  }
+
+  if (dom.exportCsvBtn) {
+    dom.exportCsvBtn.addEventListener('click', exportCSV);
   }
 
   // ===== SCROLL ANIMATIONS =====
