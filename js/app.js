@@ -482,6 +482,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ===== TOAST NOTIFICATIONS =====
+  function showToast(message, type = 'info', icon = 'ℹ️') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <span class="toast-icon">${icon}</span>
+      <span class="toast-message">${message}</span>
+    `;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 350);
+    }, 3500);
+  }
+
   // ===== REPORT & EXPORTS =====
   function downloadBlob(content, filename, contentType) {
     const blob = new Blob([content], { type: contentType });
@@ -497,7 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function exportJSON() {
     if (!state.result) {
-      alert('Please run the multimodal analysis first to generate data.');
+      showToast('Please run the multimodal analysis first to generate data.', 'warning', '⚠️');
       return;
     }
     const exportData = {
@@ -521,11 +539,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const jsonStr = JSON.stringify(exportData, null, 2);
     const filename = `dr_vision_record_${Date.now()}.json`;
     downloadBlob(jsonStr, filename, 'application/json');
+    showToast('Clinical record exported as JSON.', 'success', '💾');
   }
 
   function exportCSV() {
     if (!state.result) {
-      alert('Please run the multimodal analysis first to generate data.');
+      showToast('Please run the multimodal analysis first to generate data.', 'warning', '⚠️');
       return;
     }
     const c = state.clinicalData || {};
@@ -559,14 +578,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const csvContent = headers.join(',') + '\n' + row.join(',') + '\n';
     const filename = `dr_vision_dataset_${Date.now()}.csv`;
     downloadBlob(csvContent, filename, 'text/csv;charset=utf-8;');
+    showToast('Tabular clinical dataset exported as CSV.', 'success', '📊');
   }
 
   if (dom.downloadReportBtn) {
     dom.downloadReportBtn.addEventListener('click', () => {
       if (state.result) {
         ReportGenerator.generateReport(state.result, state.clinicalData, state.selectedImage);
+        showToast('Preparing clinical PDF report...', 'info', '📄');
       } else {
-        alert('Please run the multimodal analysis first to generate the report.');
+        showToast('Please run the multimodal analysis first to generate the report.', 'warning', '⚠️');
       }
     });
   }
@@ -675,14 +696,56 @@ document.addEventListener('DOMContentLoaded', () => {
     return emojis[stageId] || '⚪';
   }
 
-  // ===== ARCHITECTURE ANIMATION =====
-  // Highlight nodes sequentially on hover
-  document.querySelectorAll('.arch-node').forEach((node, i) => {
-    node.addEventListener('mouseenter', () => {
-      node.classList.add('active');
+  // ===== KEYBOARD SHORTCUTS & MODAL =====
+  const shortcutsModal = document.getElementById('shortcuts-modal');
+  const closeShortcutsBtn = document.getElementById('close-shortcuts-btn');
+  const navShortcutsBtn = document.getElementById('nav-shortcuts-btn');
+
+  function toggleShortcuts(show) {
+    if (!shortcutsModal) return;
+    if (show === undefined) shortcutsModal.classList.toggle('open');
+    else if (show) shortcutsModal.classList.add('open');
+    else shortcutsModal.classList.remove('open');
+  }
+
+  if (navShortcutsBtn) {
+    navShortcutsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleShortcuts();
     });
-    node.addEventListener('mouseleave', () => {
-      node.classList.remove('active');
+  }
+
+  if (closeShortcutsBtn) {
+    closeShortcutsBtn.addEventListener('click', () => toggleShortcuts(false));
+  }
+  if (shortcutsModal) {
+    shortcutsModal.addEventListener('click', (e) => {
+      if (e.target === shortcutsModal) toggleShortcuts(false);
     });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      toggleShortcuts(false);
+      return;
+    }
+    const isEditing = ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName);
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      if (dom.runAnalysisBtn) dom.runAnalysisBtn.click();
+    } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+      e.preventDefault();
+      if (dom.downloadReportBtn) dom.downloadReportBtn.click();
+    } else if (e.altKey && (e.key === 'M' || e.key === 'm')) {
+      e.preventDefault();
+      if (dom.toggleSwitch) {
+        dom.toggleSwitch.checked = !dom.toggleSwitch.checked;
+        dom.toggleSwitch.dispatchEvent(new Event('change'));
+      }
+    } else if (e.key === '?' && !isEditing) {
+      e.preventDefault();
+      toggleShortcuts();
+    }
   });
 });
