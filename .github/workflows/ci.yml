@@ -1,0 +1,74 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    name: Code & Asset Integrity Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate JSON files
+        run: |
+          node -e "
+            const fs = require('fs');
+            const files = ['manifest.json'].filter(f => fs.existsSync(f));
+            files.forEach(f => {
+              JSON.parse(fs.readFileSync(f, 'utf8'));
+              console.log('✓ Valid JSON:', f);
+            });
+          "
+
+      - name: Validate JavaScript Syntax
+        run: |
+          node -e "
+            const fs = require('fs');
+            const jsFiles = fs.readdirSync('js').filter(f => f.endsWith('.js'));
+            jsFiles.forEach(f => {
+              const code = fs.readFileSync('js/' + f, 'utf8');
+              new Function(code);
+              console.log('✓ Syntax valid: js/' + f);
+            });
+          "
+
+      - name: Check Essential Asset Files
+        run: |
+          node -e "
+            const fs = require('fs');
+            const requiredFiles = [
+              'index.html',
+              'css/styles.css',
+              'js/app.js',
+              'js/simulator.js',
+              'js/gradcam.js',
+              'js/shap.js',
+              'js/report.js',
+              'assets/images/fundus_no_dr.jpg',
+              'assets/images/fundus_mild_dr.jpg',
+              'assets/images/fundus_moderate_dr.jpg',
+              'assets/images/fundus_severe_dr.jpg',
+              'assets/images/fundus_proliferative_dr.jpg',
+              'assets/images/fundus_low_quality.jpg'
+            ];
+            let missing = 0;
+            requiredFiles.forEach(f => {
+              if (fs.existsSync(f)) {
+                console.log('✓ Found asset:', f);
+              } else {
+                console.error('✗ Missing asset:', f);
+                missing++;
+              }
+            });
+            if (missing > 0) process.exit(1);
+          "
