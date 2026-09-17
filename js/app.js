@@ -443,14 +443,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Confidence gauge
     const confidencePct = (result.confidence * 100).toFixed(1);
     dom.gaugeValue.textContent = confidencePct + '%';
-    dom.gaugeValue.style.color = result.confidence >= state.deferralThreshold ? '#00c9a7' : '#ff6b35';
+    const meetsThreshold = result.confidence >= state.deferralThreshold;
+    dom.gaugeValue.style.color = meetsThreshold ? '#00c9a7' : '#ff6b35';
 
     // Animate gauge arc
     const arcLength = 251.3; // Half-circle circumference for r=80 (π × 80)
     const dashOffset = arcLength * (1 - result.confidence);
     dom.gaugeFill.style.strokeDasharray = arcLength;
     dom.gaugeFill.style.strokeDashoffset = dashOffset;
-    dom.gaugeFill.style.stroke = result.confidence >= state.deferralThreshold ? '#00c9a7' : '#ff6b35';
+    dom.gaugeFill.style.stroke = meetsThreshold ? '#00c9a7' : '#ff6b35';
+
+    // Update threshold indicator on gauge arc
+    updateGaugeThresholdIndicator(state.deferralThreshold);
 
     // Class probabilities
     renderClassProbs(result.probabilities);
@@ -483,7 +487,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ===== DEFERRAL =====
+  // ===== DEFERRAL & THRESHOLD =====
+  function updateGaugeThresholdIndicator(threshold) {
+    const line = document.getElementById('gauge-threshold-line');
+    const label = document.getElementById('gauge-threshold-label');
+    if (label) {
+      label.textContent = `Cutoff: ${(threshold * 100).toFixed(0)}%`;
+    }
+    if (!line) return;
+
+    // Semicircle arc: 0% is at angle PI (left), 100% is at angle 0 (right)
+    const angle = Math.PI * (1 - threshold);
+    const cx = 100;
+    const cy = 100;
+    const rInner = 64;
+    const rOuter = 96;
+
+    const x1 = cx + rInner * Math.cos(angle);
+    const y1 = cy - rInner * Math.sin(angle);
+    const x2 = cx + rOuter * Math.cos(angle);
+    const y2 = cy - rOuter * Math.sin(angle);
+
+    line.setAttribute('x1', x1.toFixed(2));
+    line.setAttribute('y1', y1.toFixed(2));
+    line.setAttribute('x2', x2.toFixed(2));
+    line.setAttribute('y2', y2.toFixed(2));
+  }
+
   function renderDeferral(result) {
     updateDeferralDisplay(result.confidence);
   }
@@ -500,42 +530,81 @@ document.addEventListener('DOMContentLoaded', () => {
     const expEl = document.getElementById('deferral-explanation');
     if (expEl) {
       expEl.textContent = isDeferred
-        ? `Confidence score (${(confidence * 100).toFixed(1)}%) is below the threshold (${(state.deferralThreshold * 100).toFixed(0)}%). This case has been flagged for mandatory ophthalmologist review due to potential image quality issues or model uncertainty.`
-        : `Confidence score (${(confidence * 100).toFixed(1)}%) exceeds the threshold (${(state.deferralThreshold * 100).toFixed(0)}%). The automated diagnosis is within acceptable reliability limits.`;
+        ? `Confidence score (${(confidence * 100).toFixed(1)}%) is below the cutoff threshold (${(state.deferralThreshold * 100).toFixed(0)}%). This case has been flagged for mandatory ophthalmologist review due to potential image quality issues or model uncertainty.`
+        : `Confidence score (${(confidence * 100).toFixed(1)}%) meets or exceeds the cutoff threshold (${(state.deferralThreshold * 100).toFixed(0)}%). The automated diagnosis is within acceptable reliability limits.`;
+    }
+
+    // Synchronize gauge colors with active threshold status
+    const meetsThreshold = confidence >= state.deferralThreshold;
+    if (dom.gaugeValue) {
+      dom.gaugeValue.style.color = meetsThreshold ? '#00c9a7' : '#ff6b35';
+    }
+    if (dom.gaugeFill) {
+      dom.gaugeFill.style.stroke = meetsThreshold ? '#00c9a7' : '#ff6b35';
     }
   }
 
   function initThresholdSlider() {
-    dom.thresholdSlider.addEventListener('input', (e) => {
-      state.deferralThreshold = parseFloat(e.target.value);
-      dom.thresholdValue.textContent = (state.deferralThreshold * 100).toFixed(0) + '%';
+    updateGaugeThresholdIndicator(state.deferralThreshold);
 
-      if (state.result) {
-        updateDeferralDisplay(state.result.confidence);
-      }
-    });
+    if (dom.thresholdSlider) {
+      dom.thresholdSlider.addEventListener('input', (e) => {
+        state.deferralThreshold = parseFloat(e.target.value);
+        if (dom.thresholdValue) {
+          dom.thresholdValue.textContent = (state.deferralThreshold * 100).toFixed(0) + '%';
+        }
+        updateGaugeThresholdIndicator(state.deferralThreshold);
+
+        if (state.result) {
+          updateDeferralDisplay(state.result.confidence);
+        }
+      });
+    }
   }
 
   // ===== GRAD-CAM =====
   function initGradCAM() {
     GradCAM.init(dom.gradcamCanvas);
 
-    dom.opacitySlider.addEventListener('input', (e) => {
-      GradCAM.setOpacity(parseFloat(e.target.value));
-    });
+    if (dom.opacitySlider) {
+      dom.opacitySlider.addEventListener('input', (e) => {
+        GradCAM.setOpacity(parseFloat(e.target.value));
+      });
+    }
   }
 
   async function renderGradCAM(result) {
-    const imgSrc = state.selectedImage;
-    if (!imgSrc) return;
+    const imgSrc = state.selectedImage || (dom.previewImage && dom.previewImage.src);
+    if (!imgSrc) {
+      if (dom.gradcamDescription) {
+        dom.gradcamDescription.textContent = 'Please select or upload a fundus image to view Grad-CAM activations.';
+      }
+      return;
+    }
 
     try {
-      await GradCAM.loadImage(imgSrc);
-      GradCAM.renderAnimated(result.gradcamConfig, 2000);
+      if (dom.previewImage && dom.previewImage.complete && dom.previewImage.naturalWidth > 0 && dom.previewImage.src === imgSrc) {
+        await GradCAM.loadImage(dom.previewImage);
+      } else {
+        await GradCAM.loadImage(imgSrc);
+      }
 
-      dom.gradcamDescription.textContent = result.gradcamConfig.description;
+      GradCAM.renderAnimated(result.gradcamConfig, 1200);
+
+      if (dom.gradcamDescription && result.gradcamConfig) {
+        dom.gradcamDescription.textContent = result.gradcamConfig.description;
+      }
     } catch (err) {
-      console.error('Grad-CAM render error:', err);
+      console.warn('Grad-CAM animated render failed, retrying direct render:', err);
+      try {
+        await GradCAM.loadImage(imgSrc);
+        GradCAM.render(result.gradcamConfig);
+        if (dom.gradcamDescription && result.gradcamConfig) {
+          dom.gradcamDescription.textContent = result.gradcamConfig.description;
+        }
+      } catch (err2) {
+        console.error('Grad-CAM render error:', err2);
+      }
     }
   }
 
@@ -563,6 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.result = result;
         renderResults(result);
         renderDeferral(result);
+        renderGradCAM(result);
         renderSHAP(result);
 
         // Update comparison info
@@ -627,7 +697,8 @@ document.addEventListener('DOMContentLoaded', () => {
         stageLabel: state.result.stage.label,
         riskLevel: state.result.stage.risk,
         confidence: state.result.confidence,
-        deferred: DRSimulator.shouldDefer(state.result.confidence, 0.6),
+        threshold: state.deferralThreshold,
+        deferred: DRSimulator.shouldDefer(state.result.confidence, state.deferralThreshold),
         probabilities: state.result.probabilities,
         clinicalRiskIndex: state.result.clinicalRisk,
         fusionStrategy: state.result.fusionStrategy,
@@ -652,7 +723,7 @@ document.addEventListener('DOMContentLoaded', () => {
       'Timestamp', 'Age', 'DiabetesDuration', 'SystolicBP', 'DiastolicBP',
       'HbA1c', 'BMI', 'Cholesterol', 'Smoking', 'FamilyHistory', 'Insulin',
       'PredictedStageId', 'PredictedStageName', 'RiskLevel', 'Confidence',
-      'ClinicalRiskScore', 'Deferred', 'FusionStrategy'
+      'ThresholdCutoff', 'ClinicalRiskScore', 'Deferred', 'FusionStrategy'
     ];
     const row = [
       new Date().toISOString(),
@@ -670,8 +741,9 @@ document.addEventListener('DOMContentLoaded', () => {
       `"${r.stage.name}"`,
       r.stage.risk,
       (r.confidence * 100).toFixed(1) + '%',
+      (state.deferralThreshold * 100).toFixed(0) + '%',
       (r.clinicalRisk * 100).toFixed(1) + '%',
-      DRSimulator.shouldDefer(r.confidence, 0.6) ? 'YES' : 'NO',
+      DRSimulator.shouldDefer(r.confidence, state.deferralThreshold) ? 'YES' : 'NO',
       `"${r.fusionStrategy}"`
     ];
     const csvContent = headers.join(',') + '\n' + row.join(',') + '\n';
@@ -683,7 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (dom.downloadReportBtn) {
     dom.downloadReportBtn.addEventListener('click', () => {
       if (state.result) {
-        ReportGenerator.generateReport(state.result, state.clinicalData, state.selectedImage);
+        ReportGenerator.generateReport(state.result, state.clinicalData, state.selectedImage, state.deferralThreshold);
         showToast('Preparing clinical PDF report...', 'info', '📄');
       } else {
         showToast('Please run the multimodal analysis first to generate the report.', 'warning', '⚠️');

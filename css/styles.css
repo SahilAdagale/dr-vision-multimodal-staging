@@ -1085,6 +1085,12 @@ a {
   margin-bottom: var(--space-lg);
 }
 
+.deferral-status.waiting {
+  background: rgba(139, 149, 168, 0.08);
+  border: 2px solid var(--text-muted);
+  color: var(--text-secondary);
+}
+
 .deferral-status.accepted {
   background: rgba(0, 201, 167, 0.1);
   border: 2px solid var(--status-accept);
@@ -1098,11 +1104,21 @@ a {
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
+/* Gauge Threshold Indicator Line */
+.gauge-threshold-line {
+  stroke: #ffd700;
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  transition: all 0.15s ease-out;
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6));
+}
+
 .threshold-control {
   margin-top: var(--space-lg);
   padding: var(--space-lg);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
 }
 
 .threshold-control label {
@@ -1110,37 +1126,47 @@ a {
   font-weight: 500;
   color: var(--text-secondary);
   display: block;
-  margin-bottom: var(--space-sm);
 }
 
 .threshold-slider {
   width: 100%;
   -webkit-appearance: none;
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, var(--status-defer), var(--status-accept));
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #00c9a7 0%, #ffd700 50%, #ff6b35 100%);
   outline: none;
   cursor: pointer;
+  margin: var(--space-sm) 0;
 }
 
 .threshold-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 20px;
-  height: 20px;
+  appearance: none;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
+  background: #ffffff;
+  border: 3px solid var(--accent-primary);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+  cursor: grab;
+  transition: transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.threshold-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.15);
+  box-shadow: 0 0 16px rgba(0, 212, 255, 0.9);
 }
 
 .threshold-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  border: none;
+  background: #ffffff;
+  border: 3px solid var(--accent-primary);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+  cursor: grab;
 }
 
 .threshold-value {

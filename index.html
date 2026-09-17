@@ -384,10 +384,13 @@
               <path class="gauge-bg" d="M 20 100 A 80 80 0 0 1 180 100" />
               <path class="gauge-fill" id="gauge-fill" d="M 20 100 A 80 80 0 0 1 180 100" 
                     stroke-dasharray="251.3" stroke-dashoffset="251.3" />
+              <!-- Dynamic Threshold Cutoff Indicator on Gauge -->
+              <line id="gauge-threshold-line" class="gauge-threshold-line" x1="100" y1="100" x2="100" y2="20" stroke="#ffd700" stroke-width="3.5" stroke-linecap="round" />
             </svg>
             <div style="text-align: center; margin-top: -30px;">
               <div class="gauge-value" id="gauge-value">0%</div>
               <div class="gauge-label">Model Confidence</div>
+              <div id="gauge-threshold-label" style="font-size: 0.72rem; color: #ffd700; margin-top: 4px; font-weight: 600;">Cutoff: 60%</div>
             </div>
           </div>
 
@@ -402,8 +405,8 @@
         <div class="glass-card deferral-card">
           <h3 style="margin-bottom: 24px; font-size: 1rem; color: #8b95a8;">🛡️ Deferral Mechanism</h3>
 
-          <div class="deferral-status accepted" id="deferral-status">
-            ✅ ACCEPTED — Automated Diagnosis
+          <div class="deferral-status waiting" id="deferral-status">
+            ⏳ Awaiting Analysis
           </div>
 
           <p id="deferral-explanation" class="deferral-explanation">
@@ -411,12 +414,19 @@
           </p>
 
           <div class="threshold-control">
-            <label for="threshold-slider">Confidence Threshold (Deferral Cutoff)</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label for="threshold-slider" style="margin-bottom: 0;">Confidence Threshold (Deferral Cutoff)</label>
+              <div class="threshold-value" id="threshold-value" style="margin-top: 0;">60%</div>
+            </div>
             <input type="range" class="threshold-slider" id="threshold-slider" 
-                   min="0.3" max="0.95" step="0.05" value="0.60">
-            <div class="threshold-value" id="threshold-value">60%</div>
-            <p style="font-size: 0.7rem; color: #5a6478; margin-top: 8px;">
-              Drag to adjust: lower = more automation, higher = more clinician referrals
+                   min="0.30" max="0.95" step="0.01" value="0.60">
+            <div class="threshold-ticks" style="display: flex; justify-content: space-between; font-size: 0.68rem; color: #8b95a8; margin-top: 6px;">
+              <span>30% (Automate more)</span>
+              <span>60% (Balanced)</span>
+              <span>95% (High Safety)</span>
+            </div>
+            <p style="font-size: 0.7rem; color: #5a6478; margin-top: 10px;">
+              Drag to adjust: cases with confidence below this threshold are routed to an ophthalmologist.
             </p>
           </div>
 

@@ -1,6 +1,6 @@
 const ReportGenerator = (() => {
 
-  async function generateReport(result, clinicalData, imageSrc) {
+  async function generateReport(result, clinicalData, imageSrc, threshold = 0.6) {
     if (typeof window.jspdf === 'undefined') {
       await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js');
     }
@@ -98,14 +98,14 @@ const ReportGenerator = (() => {
     doc.setTextColor(60, 60, 80);
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Confidence Score: ${(result.confidence * 100).toFixed(1)}%`, margin, y);
+    doc.text(`Confidence Score: ${(result.confidence * 100).toFixed(1)}% (Cutoff Threshold: ${(threshold * 100).toFixed(0)}%)`, margin, y);
     y += 6;
     doc.text(`Clinical Risk Score: ${(result.clinicalRisk * 100).toFixed(1)}%`, margin, y);
     y += 6;
     doc.text(`Fusion Strategy: ${result.fusionStrategy}`, margin, y);
     y += 6;
 
-    const isDeferred = result.confidence < 0.6;
+    const isDeferred = result.confidence < threshold;
     doc.setFont('helvetica', 'bold');
     if (isDeferred) {
       doc.setTextColor(255, 107, 53);
