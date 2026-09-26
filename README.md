@@ -62,6 +62,26 @@ start index.html
 ### Running the Test Suite
 Open `tests/test-runner.html` directly in any web browser to execute the automated unit test suite for the simulator, clinical rule weighting, and explainability modules.
 
+## 🌿 Branch Structure
+
+Each feature lives on its own branch. Checkout the branch for the area you are working on, then open a PR back into `main`.
+
+| Branch | File(s) | What it covers |
+|--------|---------|----------------|
+| `feature/upload-image` | `js/app.js` | Image upload zone, drag-and-drop, file reader, clear button |
+| `feature/clinical-form` | `js/app.js` | Clinical data form inputs, sample patient quick-fill chips |
+| `feature/analysis-pipeline` | `js/app.js`, `js/simulator.js` | Analyze button, processing pipeline animation, `DRSimulator.predict()` |
+| `feature/results-visualization` | `js/app.js` | Stage badge, confidence gauge, class probability bars |
+| `feature/deferral-threshold` | `js/app.js` | Deferral status banner, threshold slider, gauge threshold indicator |
+| `feature/gradcam` | `js/gradcam.js`, `js/app.js` | Grad-CAM heatmap canvas renderer, opacity slider |
+| `feature/shap` | `js/shap.js`, `js/app.js` | SHAP waterfall chart renderer |
+| `feature/comparison-toggle` | `js/app.js` | Image-only vs. Multimodal fusion toggle and comparison info |
+| `feature/exports-reports` | `js/report.js`, `js/app.js` | PDF report (jsPDF), JSON export, CSV export |
+| `feature/ui-particles-scroll` | `js/app.js`, `css/styles.css` | Navbar scroll effect, particle background canvas, scroll animations |
+| `feature/keyboard-shortcuts` | `js/app.js` | Keyboard shortcuts modal, `?` / Ctrl+Enter / Ctrl+Shift+D / Alt+M |
+
+> **Tip**: Run `git branch -a` to see all branches, or `git checkout feature/<name>` to switch to one.
+
 ## 🤝 Contributing
 Contributions, bug reports, and suggestions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) for coding standards, commit conventions, and pull request procedures.
 
